@@ -4,28 +4,45 @@
 
 # watson-graph
 
-**MiniWatson의 모든 기능 + 지식그래프(GraphRAG) 레이어**를 합친 프로젝트. 벡터(의미) + BM25(어휘)에 **지식그래프(관계)** 를 RRF로 융합해, 여러 문서에 흩어진 멀티홉 관계 질문(기업↔상품↔법령↔공시)까지 검색한다. 그래프 엔티티 추출은 로컬 친화(LLM 0회, 증권 도메인 사전+규칙).
+**MiniWatson(watsonx 스타일 RAG 플랫폼) + 타입드 지식그래프 레이어.** 자본시장·기업공시(DART) 도메인에서 벡터(의미) + BM25(어휘)에 **관계 그래프**를 RRF로 융합해, 여러 문서에 흩어진 멀티홉 질문(기업↔상품↔법령↔공시)까지 검색한다. 엔티티/관계 추출은 로컬 친화(LLM 0회, 도메인 사전 + 시드 관계표 + 규칙).
 
-**MiniWatson 대비 추가된 것**
+이 프로젝트가 보여주려는 건 "GraphRAG를 붙였더니 좋아졌다"가 아니라 **그래프가 언제 값을 하고 언제 불필요한지를 정직하게 가르는 판단**이다. 그래서 그래프의 효과는 **반증 가능한(falsifiable) eval**로 검증하고, 멀티홉에서 벡터를 못 이기면 그렇게 결론 낸다.
 
-- `data/KnowledgeGraph` — 도메인 엔티티 co-occurrence 그래프 + 멀티홉(BFS, 깊이 2) 탐색
-- `service/DomainGlossary · DomainEntityExtractor · QueryRewriter` — 증권·자본시장(공시·IR) 사전, 엔티티 추출, 약어↔정식명 질의 재작성
-- `HybridRetriever` — RRF에 그래프 후보 합류 (벡터+BM25+그래프)
-- `RagService` — 질의 재작성 + 증권·공시 답변 페르소나
-- 설정 토글: `retrieval.graph.enabled`, `persona.domain.enabled`
-- 요청 EVAL 오버라이드: `/api/rag/ask` body의 `graph`(+기존 `hybrid`/`rerank`)
-- `eval/` — **증권 멀티홉 평가셋**(`golden_multihop.json`, `corpus/`, `ingest_multihop.sh`, `run_multihop_eval.py`): vector-only → +bm25 → **+graph** A/B를 한 표로
+## 무엇이 다른가 (vs 베이스 RAG)
 
-**그래프 A/B 빠른 실행**
+- **타입드 관계 그래프** — `data/KnowledgeGraph` + `service/DomainGlossary`. 단순 공출현이 아니라 `EdgeType` 9종(CALCULATES, REQUIRES, CLASSIFIES, GOVERNED_BY, SUPERVISES …) + 시드 관계표로 엣지에 의미를 부여. 못 잡은 관계는 UNTYPED 폴백.
+- **경로를 근거로 반환** — `searchWithPaths()`가 멀티홉 도달 경로를 `사업보고서 →REQUIRES→ 자본시장법 →CLASSIFIES→ 파생결합증권`처럼 반환. 답의 근거 사슬이자 그래프 시각화의 데이터원. 규제 도메인에서 벡터 유사도 점수보다 방어 가능한 grounding.
+- **문서 단위 엣지** — `linkDocument()`로 긴 공시가 여러 청크로 갈려도 bridge 엔티티가 청크 경계에서 끊기지 않게 보강.
+- **검색 융합** — `HybridRetriever`가 벡터+BM25+그래프를 RRF로 합치고, `retrieval.graph.weight`로 그래프-only 멀티홉 정답이 밀리지 않게 가중.
+- **관측** — `GET /api/data/graph/stats?namespace=` 노드/엣지/타입별 분포.
+- **변별 eval** — `eval/`: 하드네거티브가 깔린 코퍼스 + **gold 문서 단위 정밀 채점** + 단일홉 대조군(그래프 노이즈 체크). vector-only → +bm25 → +graph A/B를 한 표로. 설계 근거는 `eval/FIXTURE-DESIGN.md`.
+
+## 빠른 실행
 
 ```bash
-./mvnw spring-boot:run
-bash eval/ingest_multihop.sh          # 증권 픽스처 코퍼스 적재 (ns=kr-securities)
-python3 eval/run_multihop_eval.py     # +graph에서 multihop recall이 오르는지 확인
+# 1) 엔진 테스트
 ./mvnw -Dtest=KnowledgeGraphTest,DomainEntityExtractorTest test
+
+# 2) 앱 + 데이터 적재 (ns=kr-securities)
+./mvnw spring-boot:run
+bash eval/ingest_multihop.sh
+
+# 3) 그래프가 적재됐나 + 타입드 엣지가 생겼나
+curl 'localhost:8080/api/data/graph/stats?namespace=kr-securities'
+
+# 4) A/B — 멀티홉에서 +graph가 vector-only를 이기는가 (단일홉은 안 떨어져야)
+python3 eval/run_multihop_eval.py
 ```
 
-설계·근거: `reference/graphrag/GRAPHRAG_PLAN.md`. 패키지는 `com.miniwatson` 유지(원본 구조 그대로).
+## 문서
+
+- `docs/GRAPHRAG-DOMAIN-DESIGN.md` — 타입드 관계 그래프 설계(노드/엣지 스키마, 추출 전략, 거버넌스)
+- `docs/ROADMAP.md` — 단계 로드맵(기능·데이터 먼저, UI 나중)
+- `eval/FIXTURE-DESIGN.md` — 변별·정직 eval 설계
+- `CHANGELOG.md` — 변경 기록
+- `frontend/` — Next.js 프론트(금융 페르소나 RAG 화면, 현재 파킹)
+
+패키지는 `com.miniwatson` 유지(원본 구조 그대로).
 
 아래는 원본 MiniWatson README.
 
