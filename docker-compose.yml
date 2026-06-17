@@ -1,0 +1,24 @@
+# pgvector 검증용 Postgres. vector.store=pgvector 일 때 PgVectorStore가 여기에 붙는다.
+# 기동:  docker compose up -d
+# 종료:  docker compose down        (데이터 유지)
+# 초기화: docker compose down -v     (볼륨까지 삭제 → 다음 기동 시 빈 DB)
+services:
+  postgres:
+    image: pgvector/pgvector:pg16   # pgvector 확장 내장 (CREATE EXTENSION vector 가능)
+    container_name: miniwatson-pg
+    environment:
+      POSTGRES_DB: miniwatson
+      POSTGRES_USER: miniwatson
+      POSTGRES_PASSWORD: miniwatson
+    ports:
+      - "55432:5432"   # 호스트 55432 -> 컨테이너 5432. 5432/5433은 다른 컨테이너 엔진이 점유라 고포트로 비켜씀
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U miniwatson -d miniwatson"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

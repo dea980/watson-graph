@@ -1,0 +1,315 @@
+[
+  {
+    "id": "rag-def",
+    "category": "semantic",
+    "question": "What is retrieval-augmented generation?",
+    "namespace": "default",
+    "expectTitleContains": "Retrieval-augmented generation",
+    "expectAnswer": "RAG retrieves relevant external documents and feeds them to the LLM to generate a grounded answer, reducing hallucination",
+    "note": "semantic — vector should nail this"
+  },
+  {
+    "id": "vectordb-def",
+    "category": "semantic",
+    "question": "What is a vector database used for?",
+    "namespace": "default",
+    "expectTitleContains": "Vector database",
+    "expectAnswer": "A vector database stores embeddings and retrieves them by similarity (approximate nearest neighbor) for semantic search",
+    "note": "semantic"
+  },
+  {
+    "id": "rag-vs-finetune",
+    "category": "reasoning",
+    "question": "How does RAG let a model use new information without retraining?",
+    "namespace": "default",
+    "expectTitleContains": "Retrieval-augmented generation",
+    "expectAnswer": "RAG supplies new info at query time by retrieving documents, so the model uses updated/domain data without changing its weights",
+    "note": "reasoning over the RAG doc, paraphrased"
+  },
+  {
+    "id": "invoice-number",
+    "category": "lexical",
+    "question": "INV-2026-0042",
+    "namespace": "default",
+    "expectTitleContains": "invoice",
+    "expectAnswer": "INV-2026-0042 is the invoice number on the MiniWatson invoice to Acme Corp",
+    "note": "exact token — BM25/hybrid should win over pure vector"
+  },
+  {
+    "id": "invoice-total",
+    "category": "ocr-fact",
+    "question": "What is the total amount due on the invoice?",
+    "namespace": "default",
+    "expectKeywords": ["852"],
+    "expectAnswer": "The invoice total due is $852.50",
+    "note": "OCR-grounded exact number"
+  },
+  {
+    "id": "invoice-bill-to",
+    "category": "ocr-fact",
+    "question": "Who is the invoice billed to?",
+    "namespace": "default",
+    "expectKeywords": ["acme"],
+    "expectAnswer": "The invoice is billed to Acme Corp",
+    "note": "OCR field extraction"
+  },
+  {
+    "id": "silos",
+    "category": "vocab-mismatch",
+    "question": "Why do companies struggle to get value from their AI investments?",
+    "namespace": "IBM-blueprint-for-agentic-opeation",
+    "expectKeywords": ["silos"],
+    "expectAnswer": "Functional silos (fragmentation), not talent or AI maturity, block companies from realizing AI value",
+    "note": "vocabulary mismatch — no 'silos' word in the question"
+  },
+  {
+    "id": "energy-twin",
+    "category": "specific-fact",
+    "question": "What digital twin capability do energy companies value most?",
+    "namespace": "IBM-blueprint-for-agentic-opeation",
+    "expectKeywords": ["optimization recommendations"],
+    "expectAnswer": "Energy companies rank optimization recommendations as the most valuable digital twin capability",
+    "note": "specific fact in one chunk"
+  },
+  {
+    "id": "dismantling-boundaries",
+    "category": "discriminative-number",
+    "question": "What share of executives are actively dismantling functional boundaries?",
+    "namespace": "IBM-blueprint-for-agentic-opeation",
+    "expectKeywords": ["61%"],
+    "expectAnswer": "61% of executives are actively dismantling functional boundaries",
+    "note": "rare discriminative token (61%)"
+  },
+  {
+    "id": "silos-stat",
+    "category": "discriminative-number",
+    "question": "What percent of C-suite say siloed functions block value?",
+    "namespace": "IBM-blueprint-for-agentic-opeation",
+    "expectKeywords": ["82%"],
+    "expectAnswer": "82% of C-suite executives say functional silos block value",
+    "note": "specific statistic"
+  },
+  {
+    "id": "pods",
+    "category": "definition",
+    "question": "What is a cross-disciplinary pod?",
+    "namespace": "IBM-blueprint-for-agentic-opeation",
+    "expectKeywords": ["specialists"],
+    "expectAnswer": "A cross-disciplinary pod is a group of specialists from different domains who jointly steward a mission-critical workflow",
+    "note": "definition deep in the doc"
+  },
+  {
+    "id": "wiki-def",
+    "category": "semantic",
+    "question": "What is a wiki?",
+    "namespace": "default",
+    "expectTitleContains": "Wiki",
+    "expectAnswer": "A wiki is collaboratively edited hypertext on the web, managed by its audience through a browser",
+    "note": "small-doc semantic"
+  },
+  {
+    "id": "out-of-scope",
+    "category": "refusal",
+    "question": "What is the capital of France?",
+    "namespace": "default",
+    "expectAnswer": "The answer should say it cannot find this in the knowledge base / is not covered by the sources",
+    "note": "out-of-scope — judge rewards graceful 'not in context' over a confident wrong answer; no expected chunk"
+  },
+  {
+    "id": "ocr-line-item",
+    "category": "vocab-mismatch",
+    "question": "How much does the granite chat license cost on the invoice?",
+    "namespace": "default",
+    "expectKeywords": ["240"],
+    "expectAnswer": "The granite chat license line is $240 (2 x $120)",
+    "note": "OCR line item — number not in the question"
+  },
+  {
+    "id": "fragmentation-cause",
+    "category": "vocab-mismatch",
+    "question": "What is the biggest constraint on autonomous execution?",
+    "namespace": "IBM-blueprint-for-agentic-opeation",
+    "expectKeywords": ["fragmentation"],
+    "expectAnswer": "Fragmentation (disconnected workflows), not talent or AI maturity, is the biggest constraint",
+    "note": "answer word 'fragmentation' absent from question"
+  },
+  {
+    "id": "adoption-multiplier",
+    "category": "discriminative-number",
+    "question": "How much more likely is workflow adoption with the six capabilities?",
+    "namespace": "IBM-blueprint-for-agentic-opeation",
+    "expectKeywords": ["5.4x"],
+    "expectAnswer": "Six capabilities make autonomous workflow adoption 5.4x more likely",
+    "note": "rare token 5.4x — earlier shown hard for retrieval (see EVALUATION.md)"
+  },
+  {
+    "id": "negation-trap",
+    "category": "reasoning",
+    "question": "Is the main barrier to AI value a lack of talent or AI maturity?",
+    "namespace": "IBM-blueprint-for-agentic-opeation",
+    "expectKeywords": ["silos"],
+    "expectAnswer": "No — the barrier is structural (functional silos), not talent or AI maturity",
+    "note": "negation / trap — must reject the premise"
+  },
+  {
+    "id": "multi-fact",
+    "category": "reasoning",
+    "question": "Name two statistics the report gives about functional silos or boundaries.",
+    "namespace": "IBM-blueprint-for-agentic-opeation",
+    "expectKeywords": ["82%"],
+    "expectAnswer": "82% say silos block value; 61% are actively dismantling functional boundaries",
+    "note": "needs two facts, possibly from different chunks"
+  },
+  {
+    "id": "cross-domain-leadership",
+    "category": "specific-fact",
+    "question": "What share say autonomous operations fail without cross-domain leadership?",
+    "namespace": "IBM-blueprint-for-agentic-opeation",
+    "expectKeywords": ["79%"],
+    "expectAnswer": "79% of executives say autonomous operations will fail without cross-domain leadership",
+    "note": "specific statistic (verify against corpus; adjust if false MISS)"
+  },
+  {
+    "id": "wrong-namespace",
+    "category": "refusal",
+    "question": "What is the invoice total?",
+    "namespace": "IBM-blueprint-for-agentic-opeation",
+    "expectAnswer": "Should not produce a confident invoice total — the invoice is not in this namespace",
+    "note": "tenant isolation — invoice lives in 'default'; judge rewards graceful miss; no expected chunk"
+  },
+  {
+    "id": "ceo-agentic-growth",
+    "category": "discriminative-number",
+    "question": "In 2026, what percent of CEOs say agentic AI is primarily driving growth?",
+    "namespace": "IBM-ceo-study-2026",
+    "expectKeywords": ["10%"],
+    "expectAnswer": "In 2026 only 10% of CEOs say advanced (agentic) AI is primarily driving growth",
+    "note": "CEO study — rare number 10%"
+  },
+  {
+    "id": "ceo-ai-decisions-2030",
+    "category": "discriminative-number",
+    "question": "By 2030, what share of operational decisions do CEOs expect AI to make?",
+    "namespace": "IBM-ceo-study-2026",
+    "expectKeywords": ["48%"],
+    "expectAnswer": "CEOs expect AI to make 48% of operational decisions by 2030 (nearly double)",
+    "note": "CEO study — projected 48%"
+  },
+  {
+    "id": "ceo-caio-adoption",
+    "category": "discriminative-number",
+    "question": "What share of organizations had a Chief AI Officer in 2026?",
+    "namespace": "IBM-ceo-study-2026",
+    "expectKeywords": ["76%"],
+    "expectAnswer": "In 2026, 76% of organizations have a Chief AI Officer (CAIO), up from 26% in 2025",
+    "note": "CEO study — CAIO adoption 76%"
+  },
+  {
+    "id": "ceo-caio-influence",
+    "category": "specific-fact",
+    "question": "How many CEOs expect the CAIO's influence to increase by 2030?",
+    "namespace": "IBM-ceo-study-2026",
+    "expectKeywords": ["100%"],
+    "expectAnswer": "100% of these CEOs expect the influence of the CAIO to increase by 2030",
+    "note": "CEO study — 100%"
+  },
+  {
+    "id": "kr-bcg-code",
+    "category": "korean",
+    "question": "AI가 작성하는 코드의 비중은 얼마인가?",
+    "namespace": "kr-bcg",
+    "expectKeywords": ["30%"],
+    "expectAnswer": "코드의 30%는 AI가 작성한다",
+    "note": "한국어(html) — 다국어 임베딩 변별용"
+  },
+  {
+    "id": "kr-bcg-junior",
+    "category": "korean",
+    "question": "주니어 개발자 수요는 얼마나 줄었나?",
+    "namespace": "kr-bcg",
+    "expectKeywords": ["20%"],
+    "expectAnswer": "주니어 개발자 수요가 20% 줄었다",
+    "note": "한국어(html)"
+  },
+  {
+    "id": "kr-bcg-countries",
+    "category": "korean",
+    "question": "BCG 조사가 다룬 국가 수는?",
+    "namespace": "kr-bcg",
+    "expectKeywords": ["59"],
+    "expectAnswer": "BCG 조사는 59개국 데이터를 다룬다",
+    "note": "한국어(html)"
+  },
+  {
+    "id": "kr-hackathon-name",
+    "category": "korean",
+    "question": "창업 입지·업종 추천 플랫폼의 이름은?",
+    "namespace": "kr-hackathon",
+    "expectKeywords": ["Snowscape"],
+    "expectAnswer": "플랫폼 이름은 Snowscape다",
+    "note": "한국어(docx)"
+  },
+  {
+    "id": "kr-hackathon-llm",
+    "category": "korean",
+    "question": "이 프로젝트가 사용한 LLM 모델은?",
+    "namespace": "kr-hackathon",
+    "expectKeywords": ["mistral-large2"],
+    "expectAnswer": "Snowflake Cortex의 mistral-large2 모델을 사용했다",
+    "note": "한국어(docx) — 정확 토큰"
+  },
+  {
+    "id": "kr-medical-benchmark",
+    "category": "korean",
+    "question": "발표에서 소개한 의료 AI 벤치마크의 이름은?",
+    "namespace": "kr-medical",
+    "expectKeywords": ["AgentClinic"],
+    "expectAnswer": "AgentClinic이라는 멀티모달 에이전트 벤치마크다",
+    "note": "한국어+영어(pptx)"
+  },
+  {
+    "id": "kr-medical-bias",
+    "category": "korean",
+    "question": "진단 정확도에 영향을 주는 요인으로 분석한 것은?",
+    "namespace": "kr-medical",
+    "expectKeywords": ["Bias"],
+    "expectAnswer": "Bias(편향)가 진단 정확도에 미치는 영향을 분석했다",
+    "note": "한국어+영어(pptx)"
+  },
+  {
+    "id": "kr-hwp-return-days",
+    "category": "korean",
+    "question": "채용서류 반환은 청구 후 며칠 이내에 이뤄지나?",
+    "namespace": "kr-hwp",
+    "expectKeywords": ["14일"],
+    "expectAnswer": "사업장은 14일 이내에 채용서류를 반환해야 한다",
+    "note": "한국어(hwp) — hwplib 추출. MISS시 추출 텍스트 확인"
+  },
+  {
+    "id": "kr-hwp-law",
+    "category": "korean",
+    "question": "채용서류 반환 청구의 근거가 되는 법률은?",
+    "namespace": "kr-hwp",
+    "expectKeywords": ["채용절차"],
+    "expectAnswer": "채용절차의 공정화에 관한 법률에 근거한다",
+    "note": "한국어(hwp)"
+  },
+  {
+    "id": "kr-hwpx-ministry",
+    "category": "korean",
+    "question": "이 공무원 경력경쟁채용 공고를 낸 부처는?",
+    "namespace": "kr-hwpx",
+    "expectKeywords": ["문화체육관광부"],
+    "expectAnswer": "문화체육관광부가 낸 공고다",
+    "note": "한국어(hwpx) — PrvText 폴백 경유"
+  },
+  {
+    "id": "kr-hwpx-headcount",
+    "category": "korean",
+    "question": "임용예정 인원은 총 몇 명인가?",
+    "namespace": "kr-hwpx",
+    "expectKeywords": ["3명"],
+    "expectAnswer": "3개 직위, 총 3명을 임용 예정",
+    "note": "한국어(hwpx)"
+  }
+]

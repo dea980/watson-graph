@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "Article",
+  "namespace": "miniwatson.schema",
+  "fields": [
+    {"name": "id", "type": "long"},
+    {"name": "namespace", "type": "string", "default": "default"},
+    {"name": "title", "type": "string"},
+    {"name": "summary", "type": "string"},
+    {"name": "url", "type": "string"},
+    {"name": "ingestedAt", "type": "string"},
+    {"name": "embedding", "type": {"type": "array", "items": "float"}}
+  ]
+}

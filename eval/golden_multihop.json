@@ -1,0 +1,130 @@
+[
+  {
+    "id": "mh-short-index",
+    "category": "multihop",
+    "hops": 2,
+    "question": "공매도 거래가 이뤄지는 시장의 대표 주가지수는 무엇인가?",
+    "namespace": "kr-securities",
+    "gold": "01_kospi200.md",
+    "bridge": "공매도 →LISTED_ON→ 한국거래소 →CALCULATES→ 코스피200",
+    "expectKeywords": ["코스피200"],
+    "hardNegatives": ["07_kospi_index.md", "08_kosdaq.md", "09_krx_overview.md"],
+    "note": "질문은 공매도에 앵커. 정답(01)엔 공매도가 없고 질문엔 코스피200이 없음. 코스피/코스닥/KRX개요가 '대표 지수'로 벡터를 흔든다 → 관계로만 정확한 01 도달."
+  },
+  {
+    "id": "mh-report-derivative",
+    "category": "multihop",
+    "hops": 2,
+    "question": "사업보고서 제출을 의무화한 법률이 파생상품으로 분류하는 증권은?",
+    "namespace": "kr-securities",
+    "gold": "02_els_regulation.md",
+    "bridge": "사업보고서 →REQUIRES⁻¹→ 자본시장법 →CLASSIFIES→ 파생결합증권",
+    "expectKeywords": ["파생결합증권"],
+    "hardNegatives": ["03_disclosure.md", "10_quarterly_report.md", "11_audit_report.md"],
+    "note": "질문은 사업보고서/보고서/제출/의무에 앵커. 정답(02)엔 그 어휘가 없음. 보고서 문서 3개(03/10/11)가 벡터 상위를 점거 → 02가 탈락. 자본시장법 다리로만 도달."
+  },
+  {
+    "id": "mh-product-supervisor",
+    "category": "multihop",
+    "hops": 2,
+    "question": "주가연계증권을 파생결합증권으로 분류한 법률의 위반 행위를 조사하고 제재하는 감독기구는?",
+    "namespace": "kr-securities",
+    "gold": "12_fss_supervision.md",
+    "bridge": "주가연계증권 →GOVERNED_BY→ 자본시장법 →(공출현)→ 금융감독원",
+    "expectKeywords": ["금융감독원"],
+    "hardNegatives": ["02_els_regulation.md", "13_etn.md"],
+    "note": "질문이 주가연계증권/파생결합증권에 강하게 앵커 → 벡터는 02(상품·규제 문서)를 끌어와 오답. 정답(12)은 금융감독원 문서라 표면 겹침이 낮음. 자본시장법 다리로만 도달. 두 번째 홉은 UNTYPED(공출현)라 부분 타입 경로도 작동함을 보인다."
+  },
+  {
+    "id": "mh-etf-issuer-index",
+    "category": "multihop",
+    "hops": 2,
+    "question": "상장지수펀드가 추종하는 한국 대표 지수를 산출하는 기관은?",
+    "namespace": "kr-securities",
+    "gold": "09_krx_overview.md",
+    "bridge": "상장지수펀드 →(공출현)→ 코스피200 →CALCULATES⁻¹→ 한국거래소",
+    "expectKeywords": ["한국거래소"],
+    "hardNegatives": ["06_etf_basics.md", "07_kospi_index.md", "08_kosdaq.md"],
+    "note": "ETF 일반설명(06)엔 한국거래소/코스피200이 없음. 정답(09)은 셋이 함께 등장. 지수 문서들이 벡터를 흔들지만 '산출하는 기관'은 관계로만 정확히 짚힌다."
+  },
+
+  {
+    "id": "sh-els-class",
+    "category": "single-hop",
+    "hops": 1,
+    "question": "주가연계증권은 자본시장법상 무엇으로 분류되나?",
+    "namespace": "kr-securities",
+    "gold": "02_els_regulation.md",
+    "expectKeywords": ["파생결합증권"],
+    "note": "대조군 — 벡터/BM25가 직접 풀어야 함."
+  },
+  {
+    "id": "sh-quarterly-law",
+    "category": "single-hop",
+    "hops": 1,
+    "question": "분기보고서는 어떤 법률에 따라 제출되나?",
+    "namespace": "kr-securities",
+    "gold": "10_quarterly_report.md",
+    "expectKeywords": ["자본시장법"],
+    "note": "대조군 — 하드네거티브(다른 보고서 문서)가 깔려도 단일홉은 벡터가 정답 문서를 직접 짚어야 정상. graph 켜도 안 떨어져야 함(정직성 체크)."
+  },
+  {
+    "id": "sh-short-naked",
+    "category": "single-hop",
+    "hops": 1,
+    "question": "무차입 공매도는 허용되나 금지되나?",
+    "namespace": "kr-securities",
+    "gold": "04_short_selling.md",
+    "expectKeywords": ["금지"],
+    "note": "대조군."
+  },
+  {
+    "id": "sh-ipo-review",
+    "category": "single-hop",
+    "hops": 1,
+    "question": "기업공개는 한국거래소의 어떤 심사를 거치나?",
+    "namespace": "kr-securities",
+    "gold": "05_ipo.md",
+    "expectKeywords": ["상장예비심사"],
+    "note": "대조군."
+  },
+  {
+    "id": "sh-disclosure-where",
+    "category": "single-hop",
+    "hops": 1,
+    "question": "상장법인의 정기공시는 어디에 공개되나?",
+    "namespace": "kr-securities",
+    "gold": "03_disclosure.md",
+    "expectKeywords": ["전자공시시스템"],
+    "note": "단일홉 대조군 — 질문에 도메인 엔티티가 없어 그래프 시드가 안 잡힘. 벡터(의미)가 풀어야 정상."
+  },
+  {
+    "id": "sh-etf-merit",
+    "category": "single-hop",
+    "hops": 1,
+    "question": "상장지수펀드의 장점은 무엇인가?",
+    "namespace": "kr-securities",
+    "gold": "06_etf_basics.md",
+    "expectKeywords": ["분산투자"],
+    "note": "대조군."
+  },
+
+  {
+    "id": "ref-weather",
+    "category": "refusal",
+    "hops": 0,
+    "question": "내일 비가 오나요?",
+    "namespace": "kr-securities",
+    "expectRefusal": true,
+    "note": "근거 없음 → '모른다' 기대. recall로 평가 불가, --judge/수동."
+  },
+  {
+    "id": "ref-crypto",
+    "category": "refusal",
+    "hops": 0,
+    "question": "비트코인 시세 알려줘",
+    "namespace": "kr-securities",
+    "expectRefusal": true,
+    "note": "범위 밖. 코퍼스에 근거 없음."
+  }
+]

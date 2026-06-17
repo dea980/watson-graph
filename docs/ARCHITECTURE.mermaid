@@ -1,0 +1,63 @@
+%% MiniWatson — Component Architecture
+flowchart TB
+    UI["Frontend (HTML + JS)<br/>Ask · Upload · KB · Audit · Dashboard"]
+
+    subgraph CTRL["Controllers (REST /api)"]
+        RC["RagController<br/>/rag/ask, /rag/models"]
+        DC["DataController<br/>/data/ingest, /documents, /summarize, /index/stats"]
+        MC["MultimodalController<br/>/multimodal/ask, /ingest"]
+        GC["GovernanceController<br/>/governance/logs, /stats, /feedback"]
+        TC["TabularController<br/>/tabular/load, /ask"]
+    end
+
+    subgraph AI["AI Layer (watsonx.ai)"]
+        RAG["RagService<br/>embed → hybrid → rerank → LLM"]
+        HR["HybridRetriever<br/>vector + BM25 (RRF)"]
+        RR["Reranker (interface)<br/>none / llm / mmr / cross"]
+        EMB["EmbeddingService<br/>granite-embedding:278m 768-dim"]
+        OLL["OllamaService<br/>chat (multi-LLM) + vision"]
+        OCR["OcrService<br/>Tesseract"]
+    end
+
+    subgraph DATA["Data Layer (watsonx.data)"]
+        ING["IngestionService<br/>wiki / image / file (ext dispatch)"]
+        HWP["HwpExtractor<br/>HWP/HWPX -> text"]
+        CHK["Chunker (interface)<br/>fixed / recursive / semantic"]
+        IDX["IndexingService<br/>updates all indexes"]
+        VEC["VectorIndex<br/>cosine, brute-force (LSH opt-in)"]
+        KW["KeywordIndex (BM25)<br/>lexical"]
+        REPO["ArticleRepository"]
+        HOT["ArticleStore (JSON hot)"]
+        COLD["ArticleParquetStore (cold)"]
+        TIER["TieredArticleStore<br/>hot → cold compaction"]
+        SQL["TabularSqlService + TextToSqlService<br/>DuckDB text-to-SQL"]
+    end
+
+    subgraph GOV["Governance Layer (watsonx.governance)"]
+        QLOG["QueryLog (H2)<br/>model · latency · PII · sources"]
+        CAT["DocumentCatalog (H2)<br/>catalog/data split"]
+        PII["PiiRedactionService"]
+    end
+
+    UI --> RC & DC & MC & GC & TC
+    RC --> RAG
+    TC --> SQL
+    DC --> ING
+    MC --> OLL & OCR & ING
+    GC --> QLOG & CAT
+
+    RAG --> EMB --> OLL
+    RAG --> HR --> VEC & KW
+    RAG --> RR
+    RAG --> OLL
+    OLL --> PII --> QLOG
+
+    ING -->|".hwp / .hwpx"| HWP
+    ING -->|"image"| OCR
+    ING --> CHK
+    ING --> EMB
+    ING --> IDX --> VEC & KW
+    ING --> REPO
+    ING --> CAT
+
+    REPO --> TIER --> HOT & COLD

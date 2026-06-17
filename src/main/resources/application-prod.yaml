@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/miniwatson}
+    username: ${DB_USER:miniwatson}
+    password: ${DB_PASSWORD}          # 폴백 없음 — 미주입이면 기동 실패(시크릿 커밋 금지, fail-closed) (T3)
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update          # 테이블 자동 생성 (validate 아님 — 처음엔 update)
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+# 운영: hot(JSON) 누적분만 가끔 Parquet로 풀-리라이트 (데모값 3 대신 현실값)
+storage:
+  tier:
+    threshold: 500
+
+# 외부 요청이 검색 전략(rerank/hybrid)을 못 바꾸게 — 운영에선 반드시 off (T2)
+eval:
+  overrides:
+    enabled: false
+
+security:
+  enabled: ${SECURITY_ENABLED:true}   # 운영: 인증 기본 on
+  # 키는 yaml에 커밋하지 않는다(T3). 시크릿/env로 주입 — 미주입이면 빈 맵 → 전부 401(fail-closed).
+  # 예: SECURITY_APIKEYS_<KEYNAME>=ns1,ns2  또는 SPRING_APPLICATION_JSON 으로 security.api-keys 전체 주입.
+  api-keys: {}

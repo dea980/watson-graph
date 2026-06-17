@@ -1,0 +1,16 @@
+Retrieval-Augmented Generation (RAG) Notes
+
+RAG combines a retrieval system with a generative language model. Instead of
+relying only on what the model memorized during training, RAG first retrieves
+relevant documents from an external knowledge base, then feeds them to the LLM
+as context. This grounds the answer in real sources and reduces hallucination.
+
+A typical RAG pipeline has four steps:
+1. Embed the user's question into a vector.
+2. Search a vector store for the most similar document chunks (cosine similarity).
+3. Build an augmented prompt: retrieved context + the original question.
+4. Generate the final answer with the LLM.
+
+Key benefits: up-to-date knowledge without retraining, source attribution,
+and lower hallucination. The main cost is the retrieval infrastructure:
+embeddings, a vector index, and a storage format such as Parquet.

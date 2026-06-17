@@ -1,0 +1,25 @@
+%% MiniWatson — RAG Query Flow (two-stage retrieval)
+flowchart LR
+    Q["Question<br/>(+ namespace, model)"]
+    EMB["Embed query<br/>search_query: ..."]
+
+    subgraph S1["1st stage — Hybrid retrieval (recall)"]
+        VEC["VectorIndex<br/>cosine top-N"]
+        BM["KeywordIndex<br/>BM25 top-N"]
+        RRF["RRF fusion<br/>1/(k+rank)"]
+    end
+
+    RR["Rerank → top-K<br/>none / llm / mmr / cross"]
+    CTX["Build augmented prompt<br/>(context + question)"]
+    LLM["Ollama LLM<br/>grounded answer"]
+    ANS["Answer + sources"]
+
+    AUD["Audit log (H2)<br/>model · latency · PII · provenance"]
+
+    Q --> EMB
+    EMB --> VEC
+    Q -. raw text .-> BM
+    VEC --> RRF
+    BM --> RRF
+    RRF --> RR --> CTX --> LLM --> ANS
+    LLM --> AUD

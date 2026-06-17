@@ -1,0 +1,51 @@
+[
+  {
+    "id": "sql-revenue-q3",
+    "table": "revenue",
+    "path": "sample/quarterly-revenue-2025.csv",
+    "question": "What was the Q3 2025 revenue in millions USD?",
+    "expect": "24.1",
+    "note": "정확값 조회 — 작은 표"
+  },
+  {
+    "id": "sql-revenue-avg",
+    "table": "revenue",
+    "path": "sample/quarterly-revenue-2025.csv",
+    "question": "What is the average yoy growth percentage across all quarters?",
+    "expect": "16",
+    "note": "집계(AVG) — 벡터 RAG는 평균을 못 냄"
+  },
+  {
+    "id": "sql-revenue-total",
+    "table": "revenue",
+    "path": "sample/quarterly-revenue-2025.csv",
+    "question": "What is the total revenue across all four quarters in millions USD?",
+    "expect": "83",
+    "note": "집계(SUM)"
+  },
+  {
+    "id": "sql-nasa-hazardous",
+    "table": "nasa",
+    "path": "sample/nasa.csv",
+    "question": "How many objects are flagged as hazardous?",
+    "expect": "755",
+    "note": "대용량 표 집계(COUNT, 4687행 중 755) — RAG 불가, SQL 정확"
+  },
+  {
+    "id": "sql-nasa-orbit",
+    "table": "nasa",
+    "path": "sample/nasa.csv",
+    "question": "What body do all of these near-earth objects orbit?",
+    "expect": "Earth",
+    "note": "단일값 컬럼(Orbiting Body)"
+  },
+  {
+    "id": "sql-housing-count",
+    "table": "housing",
+    "path": "sample/26년_1차_비분양전환형_든든전세주택_주택목록(서울지역본부).xlsx",
+    "headerRow": 6,
+    "question": "How many housing units (rows) are in this list?",
+    "expect": "103",
+    "note": "xlsx(정부양식, 헤더 6행 skip) — COUNT(*)=103. RAG는 못 하는 집계, xlsx도 SQL로"
+  }
+]

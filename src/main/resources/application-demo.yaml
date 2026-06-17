@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:h2:file:./data/miniwatson;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+  h2:
+    console:
+      enabled: true
+
+  eval:
+    overrides:
+      enabled: ${EVAL_OVERRIDES:true}
+
+  security:
+    enabled: ${SECURITY_ENABLED:true}   # dev 기본 off → eval 그대로 동작
+    api-keys:
+      dev-all: "*"                        # 전체 권한(데모/관리)
+      acme: "default,kr-bcg"           # 예시 테넌트

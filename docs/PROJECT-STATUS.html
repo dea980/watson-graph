@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>watson-graph 금융 도메인 v2 — 현황과 전략</title>
+<style>
+  :root{
+    --bg:#0b1020; --panel:#131a2e; --panel2:#0f1626; --border:#243049;
+    --text:#e6ebf5; --muted:#93a0bd; --accent:#4d8dff; --good:#2fbf71;
+    --warn:#e0b341; --bad:#e0556b; --soft:#1d2c4d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+    line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:980px;margin:0 auto;padding:40px 22px 90px}
+  h1{font-size:25px;margin:0 0 4px;letter-spacing:-.01em}
+  h2{font-size:17px;margin:34px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--border)}
+  h3{font-size:14px;margin:16px 0 6px;color:var(--text)}
+  p,li{font-size:14px;color:var(--text)}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 6px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:15px 17px}
+  .card.alt{background:var(--panel2)}
+  .b{display:inline-block;font-size:11px;border-radius:999px;padding:2px 9px;border:1px solid var(--border);margin-left:6px;vertical-align:middle}
+  .b.done{color:var(--good);background:rgba(47,191,113,.12)}
+  .b.prog{color:var(--accent);background:var(--soft)}
+  .b.wait{color:var(--warn);background:rgba(224,179,65,.12)}
+  .b.hold{color:var(--muted);background:rgba(147,160,189,.1)}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:13px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+  th{color:var(--muted);font-weight:600}
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:1px 6px;font-size:12.5px}
+  .path{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--accent)}
+  ul{margin:6px 0;padding-left:20px}
+  li{margin:3px 0}
+  .lead{font-size:15px}
+  .tag{color:var(--accent);font-weight:600}
+  .foot{margin-top:30px;color:var(--muted);font-size:12px;border-top:1px solid var(--border);padding-top:14px}
+  .pill{display:inline-block;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:3px 10px;font-size:12px;color:var(--muted);margin:3px 5px 3px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>watson-graph 금융 도메인 v2 <span class="b prog">진행</span></h1>
+  <p class="sub">자본시장·공시(DART) GraphRAG — 현황, 왜 graph인가, 취업 데모 전략, 로드맵 · 2026-06-17</p>
+
+  <p class="lead">벡터(의미) + BM25(어휘)에 <span class="tag">지식그래프(관계)</span>를 RRF로 융합한 RAG. v2의 핵심은 엣지에 <b>관계 타입</b>을 부여해 멀티홉 경로 자체가 답의 근거가 되게 하는 것. 단, graph의 가치는 <b>가정이 아니라 증명해야 할 가설</b>이다.</p>
+
+  <h2>1. 현 상태</h2>
+  <div class="grid">
+    <div class="card"><h3>백엔드 E2E <span class="b done">확인</span></h3>
+      <p><code>/api/rag/ask</code>가 멀티홉(사업보고서→자본시장법→파생결합증권) 정답을 출처 근거와 함께 반환. Ollama 임베딩 + ingest + RAG 살아있음. <code>count=8</code>(적재 전 기준).</p></div>
+    <div class="card"><h3>T1-A 타입드 엔진 <span class="b prog">코드완료·빌드대기</span></h3>
+      <p><code>EdgeType</code> 9종 + 시드 관계표, 타입드 adjacency, <code>searchWithPaths()</code> 경로 반환. 빌드/테스트 그린은 로컬 확인 대기.</p></div>
+    <div class="card alt"><h3>graph-stats 관측 <span class="b done">추가</span></h3>
+      <p><code>GET /api/data/graph/stats?namespace=</code> — 노드/엣지/타입별 분포. ingest가 그래프까지 됐는지, 타입드 엣지가 생성됐는지 검증.</p></div>
+    <div class="card alt"><h3>FE (Next) <span class="b wait">파킹</span></h3>
+      <p>금융 페르소나 일반 RAG 화면 스캐폴딩 완료. 기능+데이터 확정 뒤 P2에서 연결.</p></div>
+  </div>
+
+  <h2>2. 왜 graph인가 — 정직한 분석</h2>
+  <p><b>불편한 사실:</b> 직전 eval에서 vector-only가 멀티홉 3/3(100%)을 찍었다. "이 코퍼스에선 vector가 안 틀렸다 = graph가 필요 없었다"는 데이터다. graph의 가치는 아직 미증명이며, 인정하고 시작한다.</p>
+  <h3>graph가 정당화되는 조건 (셋 다 충족)</h3>
+  <ul>
+    <li><b>멀티홉인데 질문↔정답 표면 겹침이 없는 질의</b> — 겹치면 vector가 어차피 잡아 graph 무용.</li>
+    <li><b>하드네거티브가 깔린 코퍼스</b> — 같은 주제 오답이 있어야 "관계로만 도달"이 의미를 가짐.</li>
+    <li><b>추출 가능한 이산적 관계</b> — 법이 분류한다 / 기관이 산출한다처럼 결정적으로 뽑혀야 함.</li>
+  </ul>
+  <h3>이 도메인 평가 — 반반</h3>
+  <div class="grid">
+    <div class="card"><h3 style="color:var(--good)">맞는 쪽</h3>
+      <p>자본시장·공시는 관계가 규정에 박혀 이산적(법령→공시 의무, 법령→상품 분류, 기관→지수 산출). DART는 반정형 관계 데이터. <b>조건 3 충족.</b></p></div>
+    <div class="card"><h3 style="color:var(--warn)">불확실한 쪽</h3>
+      <p>실제 사용자가 그런 멀티홉을 자주 묻나? 대부분 단일홉이고 vector가 다 잡음. 멀티홉 질문은 구성된 케이스에 가까움. <b>조건 1의 현실 빈도 미증명.</b></p></div>
+  </div>
+  <h3>두 갈래 가치 명제</h3>
+  <table>
+    <tr><th>명제</th><th>내용</th><th>상태</th></tr>
+    <tr><td><b>(A) retrieval recall</b></td><td>vector가 놓치는 걸 graph가 건진다</td><td>반증 가능하게 증명해야 — 미증명</td></tr>
+    <tr><td><b>(B) 설명가능성·감사</b></td><td>타입드 경로가 답의 근거 사슬<br><span class="path">사업보고서 →REQUIRES→ 자본시장법 →CLASSIFIES→ 파생결합증권</span></td><td>recall과 별개 standalone 가치 — 규제 도메인에 적합</td></tr>
+  </table>
+
+  <h2>3. 데모 전략 (취업 데모)</h2>
+  <p>목표가 취업 데모면 무게가 "프로덕션에서 graph가 이기냐"에서 <b>"엔지니어링 판단력을 보이냐"</b>로 옮겨간다. 면접관이 보는 건 그쪽이다.</p>
+  <ul>
+    <li><b>(B) 설명가능성을 주연으로.</b> 타입드 경로 시각화가 화면에서 즉시 읽힌다. vector 유사도 점수가 못 주는 "추론하는 그림". 금융 감사/근거 요구와도 맞음.</li>
+    <li><b>(A) recall은 반증 가능한 eval로 보조.</b> 조작된 숫자 자랑은 면접에서 약하다. "언제 이기고 언제 불필요한지 안다"가 시니어 신호.</li>
+    <li><b>핵심 아티팩트:</b> 같은 멀티홉 질문 → vector는 오답/약함 / +graph는 정답 + 화면에 경로. 옆에 정직한 eval 표(단일홉은 graph 꺼도 vector가 이김).</li>
+  </ul>
+  <p class="sub">서사 한 줄: "하이브리드 검색을 만들고, 반증 가능한 eval로 각 레이어가 언제 값을 하는지 안다. 그리고 타입드 경로로 답의 근거를 시각화한다."</p>
+
+  <h2>4. 로드맵 — 기능·데이터 먼저, UI 나중</h2>
+  <table>
+    <tr><th>단계</th><th>내용</th><th>구성</th><th>상태</th></tr>
+    <tr><td>P1</td><td>기능 + 데이터 (백엔드 우선)</td><td>백엔드 E2E, T1-A 타입드 엔진, graph-stats, T1-D 변별 eval</td><td><span class="b prog">진행</span></td></tr>
+    <tr><td>P2</td><td>UI</td><td>U1 연결, U2 그래프 경로 시각화</td><td><span class="b wait">대기(스캐폴딩만)</span></td></tr>
+    <tr><td>P3</td><td>배포 + 실데이터</td><td>U3 배포, DART 적재</td><td><span class="b hold">보류</span></td></tr>
+  </table>
+  <p class="sub">정본: <code>docs/ROADMAP.md</code>, 설계: <code>docs/GRAPHRAG-DOMAIN-DESIGN.md</code></p>
+
+  <h2>5. T1-D 변별 픽스처 — before/after와 정직성</h2>
+  <p>graph가 일할 헤드룸을 만들기 위해 코퍼스를 13개 본문으로 늘리고 하드네거티브를 깔았다. 채점은 키워드가 아니라 <b>gold 문서 단위</b>로 정밀화.</p>
+  <div class="grid">
+    <div class="card"><h3>변별 장치</h3>
+      <ul>
+        <li>하드네거티브 — 보고서 질문에 분기·감사보고서, 지수 질문에 코스피·코스닥</li>
+        <li>vector-hard 멀티홉 — 질문과 정답이 표면 어휘 비공유</li>
+        <li>문서 단위 정밀 채점 — 오답 문서가 같은 단어 담아도 불통과</li>
+      </ul></div>
+    <div class="card"><h3>정직성(falsifiable)</h3>
+      <ul>
+        <li>단일홉 대조군 6개 — graph 켜도 안 떨어져야(노이즈 체크)</li>
+        <li>graph가 질 수 있는 케이스 포함</li>
+        <li>한 멀티홉은 두 번째 홉이 UNTYPED — 부분 타입도 작동함을 정직하게</li>
+      </ul></div>
+  </div>
+  <h3>기대 결과 (가설 · 실행으로 검증)</h3>
+  <table>
+    <tr><th>구간</th><th>vector-only</th><th>+graph</th></tr>
+    <tr><td>단일홉 (6)</td><td>높음</td><td>같음 (안 떨어져야)</td></tr>
+    <tr><td>멀티홉 (4)</td><td>낮음 (하드네거티브로 정답 탈락)</td><td>높아져야</td></tr>
+  </table>
+  <p class="sub">멀티홉에서 +graph가 못 이기면 → "이 도메인엔 graph가 recall로 정당화 안 됨"이 정직한 결론. 그땐 기본 off + 설명가능성 용도로 포지셔닝. 설계: <code>eval/FIXTURE-DESIGN.md</code></p>
+
+  <h2>6. 다음 액션 (P1 검증)</h2>
+  <div class="card alt">
+    <p style="margin:0 0 8px"><span class="pill">1. 엔진 그린</span><code>./mvnw -Dtest=KnowledgeGraphTest,DomainEntityExtractorTest test</code></p>
+    <p style="margin:0 0 8px"><span class="pill">2. 적재 + 그래프 검증</span><code>bash eval/ingest_multihop.sh</code> → <code>curl 'localhost:8080/api/data/graph/stats?namespace=kr-securities'</code></p>
+    <p style="margin:0"><span class="pill">3. A/B 증명</span><code>python3 eval/run_multihop_eval.py</code> — 멀티홉에서 +graph가 vector-only를 이기는가</p>
+  </div>
+
+  <div class="foot">watson-graph · 자본시장·공시 GraphRAG · 이 문서는 현황/전략 스냅샷이며 코드·로드맵 변경 시 갱신된다.</div>
+
+</div>
+</body>
+</html>

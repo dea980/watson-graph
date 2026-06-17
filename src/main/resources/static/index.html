@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>MiniWatson</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="layout">
+
+    <header class="header">
+        <div class="header-inner">
+            <div class="brand">
+                <span class="brand-mark"></span>
+                <span class="brand-name">MiniWatson</span>
+            </div>
+            <div class="header-meta">watsonx-style RAG platform</div>
+        </div>
+    </header>
+
+    <main class="main">
+
+        <!-- Status Grid -->
+        <section class="status-grid">
+            <div class="status-card">
+                <div class="status-indicator status-active"></div>
+                <div class="status-content">
+                    <div class="status-label">AI Layer</div>
+                    <div class="status-value" id = "ai-model">Ollama · gemma4</div>
+                    <div class="status-meta">watsonx.ai analog</div>
+                </div>
+            </div>
+            <div class="status-card">
+                <div class="status-indicator status-active"></div>
+                <div class="status-content">
+                    <div class="status-label">Data Layer</div>
+                    <div class="status-value">Parquet · 768-dim embeddings</div>
+                    <div class="status-meta">watsonx.data analog</div>
+                </div>
+            </div>
+            <div class="status-card">
+                <div class="status-indicator status-active"></div>
+                <div class="status-content">
+                    <div class="status-label">Governance Layer</div>
+                    <div class="status-value">H2 · audit trail</div>
+                    <div class="status-meta">watsonx.governance analog</div>
+                </div>
+            </div>
+        </section>
+        <!-- Ask RAG -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">Ask</h2>
+                <span class="panel-subtitle">Question → retrieval → grounded answer</span>
+            </div>
+            <div class="panel-body">
+                <div class="input-row">
+                    <input id="question" type="text" placeholder="Type a question. e.g. What is RAG?" class="input">
+                    <input id="ask-namespace" type="text" placeholder="namespace (default)" class="input">
+                    <select id="model-select" class="input"></select>
+                    <button onclick="askRAG()" class="btn btn-primary">Submit</button>
+                </div>
+                <div id="rag-loading" class="hidden status-msg">Retrieving · generating</div>
+                <div id="rag-answer" class="answer-box hidden"></div>
+                <div id="rag-sources" class="hidden">
+                    <div class="meta-label">Sources</div>
+                    <div id="sources-list"></div>
+                </div>
+                <div id="rag-feedback" class="hidden">
+                    <button onclick="sendFeedback('up')" class="btn-ghost">👍</button>
+                    <button onclick="sendFeedback('down')" class="btn-ghost">👎</button>
+                    <span id="feedback-result"></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ingest -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">Ingest</h2>
+                <span class="panel-subtitle">Pull Wikipedia article into knowledge base</span>
+            </div>
+            <div class="panel-body">
+                <div class="input-row">
+                    <input id="ingest-title" type="text"
+                           placeholder="Wikipedia title. e.g. Vector_database"
+                           class="input">
+                    <button onclick="ingestArticle()" class="btn btn-secondary">Ingest</button>
+                </div>
+                <div id="ingest-result" class="status-msg"></div>
+            </div>
+        </section>
+        <section class = "panel">
+            <div class="panel-header">
+                <h2 class = "panel-title">Upload</h2>
+                <span class ="panel-subtitle">이미지 또는 텍스트 파일을 지식베이스로 </span>
+            </div>
+            <div class="panel-body">
+                <div class="input-row">
+                    <input id="upload-file" type="file" class="input">
+                    <input id = "upload-namespace" type ="text" placeholder="namespace (default)" class = "input">
+                    <button onclick = "uploadFile()" class = "btn btn-secondary">Upload</button>
+                </div>
+                <div id = "upload-result" class="status-msg"></div>
+            </div>
+        </section>
+        <!-- Governance Dashboard -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">Governance Dashboard</h2>
+                <button onclick="loadStats()" class="btn-ghost">Refresh</button>
+            </div>
+            <div class="panel-body">
+                <div id="stats-cards" class="status-grid"></div>   <!-- KPI 카드 -->
+                <div id="stats-models"></div>                       <!-- 모델별 -->
+                <div id="stats-sources"></div>                      <!-- 소스별 -->
+            </div>
+        </section>
+        <!-- Tabs -->
+        <div class="tab-bar">
+            <button onclick="showTab('articles')" id="tab-articles" class="tab active">Articles</button>
+            <button onclick="showTab('logs')" id="tab-logs" class="tab">Audit Trail</button>
+        </div>
+
+        <!-- Articles -->
+        <section id="articles-section" class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">Knowledge Base</h2>
+                <button onclick="loadDocuments()" class="btn-ghost">Refresh</button>
+            </div>
+            <div class="panel-body">
+                <div id="articles-list"></div>
+            </div>
+        </section>
+
+        <!-- Logs -->
+        <section id="logs-section" class="panel hidden">
+            <div class="panel-header">
+                <h2 class="panel-title">Audit Trail</h2>
+                <button onclick="loadLogs()" class="btn-ghost">Refresh</button>
+            </div>
+            <div class="panel-body">
+                <div class="table-scroll">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Question</th>
+                            <th>Model</th>
+                            <th class="num">Latency</th>
+                            <th>PII</th>
+                            <th>Sources</th>          <!-- 추가 -->
+                            <th>Timestamp</th>
+                        </tr>
+                        </thead>
+                        <tbody id="logs-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <span>Daeyeop Kim</span>
+            <a href="https://github.com/dea980/miniwatson">github</a>
+        </div>
+    </footer>
+
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

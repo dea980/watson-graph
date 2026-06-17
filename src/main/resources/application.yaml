@@ -1,0 +1,68 @@
+spring:
+  application:
+    name: miniwatson
+  profiles:
+    active: dev
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+retrieval:
+  hybrid:
+    enabled: true        # false면 벡터-only (비교용)
+  graph:
+    enabled: true        # 지식그래프(관계) 후보를 RRF에 합류. false로 A/B (증권 멀티홉 eval)
+    weight: 2.0          # 그래프 후보 RRF 가중 배수. 멀티홉 정답이 graph 리스트에만 떠 약하게 잡히는 걸 보정. eval에서 1.0~3.0 스윕
+
+persona:
+  domain:
+    enabled: true        # 증권·공시 답변 페르소나(규정·출처 근거, 보수적). false면 일반 톤
+
+chunking:
+  strategy: recursive    # fixed | recursive | semantic
+  max-size: 1000
+  expand-acronyms: true  # 약어->정식명 주입(CAIO->Chief AI Officer). false로 A/B 비교. 근거 docs/CHUNKING.md
+
+rerank:
+  strategy: mmr          # none | llm | mmr | cross  (mmr 기본: eval recall 100%, cross는 맥에서 폴백)
+
+storage:
+  tier:
+    threshold: 3          # 데모용 낮은 값: 3개마다 JSON(hot)→Parquet(cold) compact가 바로 보이게. prod에서 override
+
+server:
+  port: 8080
+  error:
+    include-message: always
+
+ollama:
+  url: ${OLLAMA_URL:http://localhost:11434}
+  chat-model: ${OLLAMA_CHAT_MODEL:ibm/granite4:latest}
+  chat-models: ${OLLAMA_CHAT_MODELS:ibm/granite4:latest,gemma4}
+  vision-model: ${OLLAMA_VISION_MODEL:llava:latest}
+  embed-model: ${OLLAMA_EMBED_MODEL:granite-embedding:278m}  # 비교 승자: 한+영 코퍼스서 recall 97%(한국어 11/11). 근거 docs/EMBEDDINGS.md 7절
+  num-predict: ${OLLAMA_NUM_PREDICT:256}
+
+vector:
+  store: ${VECTOR_STORE:memory}   # memory(인메모리 LSH/brute) | pgvector(영속). 근거 docs/PGVECTOR.md
+  index:
+    lsh:
+      enabled: false
+
+# pgvector 연결 (vector.store=pgvector 일 때만 사용). docker-compose.yml의 값과 일치.
+pgvector:
+  url: ${PGVECTOR_URL:jdbc:postgresql://localhost:5433/miniwatson}
+  user: ${PGVECTOR_USER:miniwatson}
+  password: ${PGVECTOR_PASSWORD:miniwatson}
+
+eval:
+  overrides:
+    enabled: ${EVAL_OVERRIDES:true} # dev/demo = true , prod = false
+
+security:
+  mode: ${SECURITY_MODE:apikey-filter}
+  enabled: ${SECURITY_ENABLED:false}   # dev 기본 off → eval 그대로 동작
+  api-keys:
+    dev-all: "*"                        # 전체 권한(데모/관리)
+    acme:    "default,kr-bcg"           # 예시 테넌트

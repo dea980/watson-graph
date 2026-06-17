@@ -1,0 +1,78 @@
+# 배포용 풀스택 — VPS/Oracle Cloud 등에서:
+#   1) .env 작성 (.env.example 복사 → DB_PASSWORD 등 채움)
+#   2) docker compose -f docker-compose.prod.yml up -d
+#   3) 첫 기동 시 ollama-init가 모델(수 GB)을 자동 pull — 받는 동안 ask는 대기
+#
+# postgres 하나가 JPA(감사·카탈로그) + pgvector(벡터)를 겸한다. 시크릿은 .env(커밋 금지).
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: miniwatson
+      POSTGRES_USER: miniwatson
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?.env에 DB_PASSWORD 필요}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U miniwatson -d miniwatson"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama:/root/.ollama
+    # GPU가 있으면 아래 주석 해제 (NVIDIA Container Toolkit 필요)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices: [{ driver: nvidia, count: all, capabilities: [gpu] }]
+    restart: unless-stopped
+
+  # 1회성: ollama 뜨면 필요한 모델을 받아둔다 (받고 종료)
+  ollama-init:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_started
+    environment:
+      OLLAMA_HOST: ollama:11434
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      "sleep 5 &&
+       ollama pull ibm/granite4:latest &&
+       ollama pull granite-embedding:278m &&
+       ollama pull llava:latest"
+    restart: "no"
+
+  app:
+    image: ghcr.io/dea980/miniwatson:latest   # CI가 main에서 푸시. 패키지는 public이어야 pull됨
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DATABASE_URL: jdbc:postgresql://postgres:5432/miniwatson
+      DB_USER: miniwatson
+      DB_PASSWORD: ${DB_PASSWORD:?.env에 DB_PASSWORD 필요}
+      VECTOR_STORE: pgvector
+      PGVECTOR_URL: jdbc:postgresql://postgres:5432/miniwatson
+      PGVECTOR_USER: miniwatson
+      PGVECTOR_PASSWORD: ${DB_PASSWORD:?.env에 DB_PASSWORD 필요}
+      OLLAMA_URL: http://ollama:11434
+      SECURITY_ENABLED: ${SECURITY_ENABLED:-false}   # 데모면 false(UI 동작), 운영이면 true
+      SECURITY_MODE: ${SECURITY_MODE:-apikey-filter}
+    ports:
+      - "8080:8080"
+    volumes:
+      - appdata:/app/data           # parquet 콜드스토어 영속 (재시작에도 적재본 유지)
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  ollama:
+  appdata:

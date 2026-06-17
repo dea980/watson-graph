@@ -1,0 +1,105 @@
+[
+  {
+    "id": "mh-short-index",
+    "category": "multihop",
+    "hops": 2,
+    "question": "공매도 거래가 이뤄지는 시장의 대표 주가지수는 무엇인가?",
+    "namespace": "kr-securities",
+    "gold": "01_kospi200.md",
+    "bridge": "공매도(D4) → 한국거래소 → 코스피200(D1)",
+    "expectKeywords": ["코스피200"],
+    "note": "질문은 공매도에 앵커. 정답 D1엔 공매도가 없고, 질문엔 코스피/한국거래소가 없음 → 관계로만 도달."
+  },
+  {
+    "id": "mh-report-derivative",
+    "category": "multihop",
+    "hops": 2,
+    "question": "사업보고서 제출을 의무화한 법률이 파생상품으로 분류하는 증권은?",
+    "namespace": "kr-securities",
+    "gold": "02_els_regulation.md",
+    "bridge": "사업보고서(D3) → 자본시장법 → 파생결합증권(D2)",
+    "expectKeywords": ["파생결합증권"],
+    "note": "질문은 사업보고서에 앵커. 정답 D2엔 사업보고서가 없고, 질문엔 자본시장법/파생결합증권이 없음."
+  },
+  {
+    "id": "mh-etf-issuer-index",
+    "category": "multihop",
+    "hops": 2,
+    "question": "상장지수펀드가 추종하는 한국 대표 지수를 산출하는 기관은?",
+    "namespace": "kr-securities",
+    "gold": "01_kospi200.md",
+    "bridge": "상장지수펀드(D6/D1) → 코스피 → 한국거래소(D1)",
+    "expectKeywords": ["한국거래소", "코스피"],
+    "note": "ETF 일반설명 D6엔 한국거래소/코스피가 없음. 정답 D1은 셋이 함께 등장 → 그래프 우위."
+  },
+
+  {
+    "id": "sh-els-class",
+    "category": "single-hop",
+    "hops": 1,
+    "question": "주가연계증권은 자본시장법상 무엇으로 분류되나?",
+    "namespace": "kr-securities",
+    "gold": "02_els_regulation.md",
+    "expectKeywords": ["파생결합증권"],
+    "note": "대조군 — 벡터/BM25가 직접 풀어야 함."
+  },
+  {
+    "id": "sh-short-naked",
+    "category": "single-hop",
+    "hops": 1,
+    "question": "무차입 공매도는 허용되나 금지되나?",
+    "namespace": "kr-securities",
+    "gold": "04_short_selling.md",
+    "expectKeywords": ["금지"],
+    "note": "대조군."
+  },
+  {
+    "id": "sh-ipo-review",
+    "category": "single-hop",
+    "hops": 1,
+    "question": "기업공개는 한국거래소의 어떤 심사를 거치나?",
+    "namespace": "kr-securities",
+    "gold": "05_ipo.md",
+    "expectKeywords": ["상장예비심사"],
+    "note": "대조군."
+  },
+  {
+    "id": "sh-disclosure-where",
+    "category": "single-hop",
+    "hops": 1,
+    "question": "상장법인의 정기공시는 어디에 공개되나?",
+    "namespace": "kr-securities",
+    "gold": "03_disclosure.md",
+    "expectKeywords": ["전자공시시스템"],
+    "note": "단일홉 대조군 — 질문에 도메인 엔티티가 없어 그래프 시드가 안 잡힘. 벡터(의미)가 풀어야 정상."
+  },
+  {
+    "id": "sh-etf-merit",
+    "category": "single-hop",
+    "hops": 1,
+    "question": "상장지수펀드의 장점은 무엇인가?",
+    "namespace": "kr-securities",
+    "gold": "06_etf_basics.md",
+    "expectKeywords": ["분산투자"],
+    "note": "대조군."
+  },
+
+  {
+    "id": "ref-weather",
+    "category": "refusal",
+    "hops": 0,
+    "question": "내일 비가 오나요?",
+    "namespace": "kr-securities",
+    "expectRefusal": true,
+    "note": "근거 없음 → '모른다' 기대. recall로 평가 불가, --judge/수동."
+  },
+  {
+    "id": "ref-crypto",
+    "category": "refusal",
+    "hops": 0,
+    "question": "비트코인 시세 알려줘",
+    "namespace": "kr-securities",
+    "expectRefusal": true,
+    "note": "범위 밖. 코퍼스에 근거 없음."
+  }
+]
